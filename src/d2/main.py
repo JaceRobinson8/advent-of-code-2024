@@ -30,6 +30,31 @@ class Report:
 
         return safe
 
+    def is_safe_with_dampener(self) -> bool:
+        damp_available = True
+        safe = True
+
+        is_increasing = (
+            self.levels[0] < self.levels[1] and self.levels[1] < self.levels[2]
+        )
+
+        for x0, x1, x2 in triplewise(self.levels):
+            cond1 = self.unsafe_condition(x0, x1, is_increasing)
+            cond2 = self.unsafe_condition(x1, x2, is_increasing)
+
+
+def triplewise(iterable):
+    # triplewise('ABCDEFG') → ABC BCD CDE DEF EFG
+
+    iterator = iter(iterable)
+    a = next(iterator, None)
+    b = next(iterator, None)
+
+    for c in iterator:
+        yield a, b, c
+        a = b
+        b = c
+
 
 def parse_line(line: str) -> list[int]:
     return [int(num) for num in line.strip().split(" ")]
@@ -49,7 +74,7 @@ def main1(data_file: Path):
 
 def main2(data_file: Path):
     reports = parse_data(data_file)
-    res = sum([report.is_safe() for report in reports])
+    res = sum([report.is_safe_with_dampener() for report in reports])
     print(f"Result: {res=}")
 
 
